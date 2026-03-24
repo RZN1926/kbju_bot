@@ -410,6 +410,7 @@ async def generate_ai_recipe(
 def format_recipe(variant: RecipeVariant) -> str:
     """Возвращает Markdown-сообщение для Telegram с КБЖУ на порцию и на 100 г."""
     card    = calc_nutrition(variant.ingredients)
+    per100  = card.per_100g()
 
     # Строки ингредиентов с указанием варёного веса для круп
     ing_lines: list[str] = []
@@ -437,11 +438,6 @@ def format_recipe(variant: RecipeVariant) -> str:
         + "\n".join(step_lines)
         + f"\n{notes_block}"
         + f"\n{'─' * 30}\n"
-        + f"📊 *КБЖУ на порцию* (~{int(card.total_weight_g)} г):\n"
-        + f"  🔥 Калории: *{card.calories} ккал*\n"
-        + f"  🥩 Белки:   *{card.protein} г*\n"
-        + f"  🧈 Жиры:    *{card.fat} г*\n"
-        + f"  🍞 Углеводы: *{card.carbs} г*\n\n"
         + f"📊 *КБЖУ на 100 г:*\n"
         + f"  🔥 Калории: *{per100.calories} ккал*\n"
         + f"  🥩 Белки:   *{per100.protein} г*\n"

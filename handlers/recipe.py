@@ -241,16 +241,20 @@ async def _run_ai_and_reply(
         )
     except Exception as exc:
         log.exception("Ошибка AI-генерации: %s", exc)
+        # 1. Записываем ПРИЧИНУ в логи сервера (их увидишь только ты через SSH)
+        log.error(f"Ошибка генерации рецепта: {exc}", exc_info=True)
+
+        # 2. Формируем текст для ПОЛЬЗОВАТЕЛЯ (без лишних подробностей)
         error_text = (
-            "❌ *AI не смог сгенерировать рецепт.*\n\n"
-            f"_Причина: {str(exc)[:200]}_\n\n"
-            "Попробуй ещё раз — иногда модель возвращает неверный формат."
+            "❌ *Не удалось составить рецепт.*\n\n"
+            "Сервер ИИ сейчас немного перегружен. Пожалуйста, "
+            "попробуй нажать кнопку еще раз через пару минут! 👨‍🍳"
         )
         if edit:
-            await target_message.edit_text(error_text, parse_mode="Markdown",
+            await target_message.edit_text(error_text, parse_mode=None,
                                            reply_markup=kb_recipe_error())
         else:
-            await target_message.answer(error_text, parse_mode="Markdown",
+            await target_message.answer(error_text, parse_mode=None,
                                         reply_markup=kb_recipe_error())
         return
 

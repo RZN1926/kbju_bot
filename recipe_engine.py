@@ -326,14 +326,22 @@ async def generate_ai_recipe(
 
     # ── Запрос к LLM ──────────────────────────────────────────────────────────
     client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+    
+    # Объединяем системный промпт и данные пользователя в один текст
+    combined_content = (
+        f"{_SYSTEM_PROMPT}\n\n"
+        f"Данные для обработки:\n"
+        f"Продукты: {product_list_str}"
+    )
+
     response = await client.chat.completions.create(
         model=model,
         temperature=0.7,
         max_tokens=1200,
         response_format={"type": "json_object"},
         messages=[
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user",   "content": f"Продукты: {product_list_str}"},
+            # Используем только роль "user", это работает везде
+            {"role": "user", "content": combined_content},
         ],
     )
     raw_content: str = response.choices[0].message.content or ""
@@ -402,7 +410,6 @@ async def generate_ai_recipe(
 def format_recipe(variant: RecipeVariant) -> str:
     """Возвращает Markdown-сообщение для Telegram с КБЖУ на порцию и на 100 г."""
     card    = calc_nutrition(variant.ingredients)
-    per100  = card.per_100g()
 
     # Строки ингредиентов с указанием варёного веса для круп
     ing_lines: list[str] = []
